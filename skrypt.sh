@@ -64,6 +64,32 @@ function network_info() {
     echo ""
 }
 
+function generate_raport(){
+    basic_info
+    cpu_info
+    memory_info
+    disk_info
+    uptime_info
+    network_info 
+}
+
+function display_info() {
+    echo "=== Informacje systemowe ==="
+    generate_raport
+    echo "Naciśnij Enter, aby kontynuować..."
+    read
+}
+
+function save_report() {
+    echo ">>> Generowanie raportu do $REPORT_FILE..."
+    {
+        date
+        generate_raport
+    } > "$REPORT_FILE"
+    zenity --info --text="Raport zapisany do $REPORT_FILE"
+}
+
+
 # Wyświetlenie pomocy
 function show_help() {
     echo "Użycie: ./skrypt.sh [opcje]"
@@ -95,13 +121,13 @@ function show_menu() {
     clear
     # Call the function for the selected option
     case $choice in
-        1) basic_info; cpu_info; memory_info; disk_info; uptime_info; network_info ;;
+        1) display_info ;;
         2) save_report ;;
         3) dynamic_mode ;;
         0) exit 0 ;;
-        *) clear; echo "Niepoprawny wybór!"; sleep 1;;
+        *) zenity --error --text="Niepoprawny wybór!";;
     esac
-}
+}   
 
 # Obsługa opcji wiersza poleceń
 if [[ $# -gt 0 ]]; then
@@ -115,6 +141,4 @@ fi
 while true; do
     clear
     show_menu
-    echo -n "Wciśnij ENTER, aby kontynuować..."
-    read
 done
