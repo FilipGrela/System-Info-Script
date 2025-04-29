@@ -108,6 +108,7 @@ function dynamic_mode() {
 # Funkcja zapisująca raport przez określony czas
 function save_report_with_duration() {
     local duration=$1
+    local refresh_interval=$1
     local file_name="raport_systemowy_$(date +%Y%m%d_%H%M%S).txt"
 
     echo ">>> Rozpoczęto zapisywanie raportu do pliku $file_name przez $duration sekund..."
@@ -123,7 +124,7 @@ function save_report_with_duration() {
         echo "Czas: $(date)" >> "$file_name"
         generate_raport >> "$file_name"
         echo "----------------------------------------" >> "$file_name"
-        sleep "$REFRESH_INTERVAL"
+        sleep "$refresh_interval"
     done
 
     echo ">>> Raport zapisany do pliku $file_name"
@@ -146,8 +147,22 @@ function save_report_with_dialog() {
         return
     fi
 
+    local refresh_interval=$(zenity --entry --title="Interwał odświeżania" --text="Podaj interwał odświeżania (w sekundach):")
+
+    # Sprawdzenie, czy użytkownik podał wartość
+    if [[ -z "$refresh_interval" ]]; then
+        zenity --error --text="Nie podano interwału odświeżania!"
+        return
+    fi
+
+    # Sprawdzenie, czy podano liczbę
+    if ! [[ "$refresh_interval" =~ ^[0-9]+$ ]]; then
+        zenity --error --text="Podano nieprawidłowy interwał! Wprowadź liczbę całkowitą."
+        return
+    fi
+
     # Wywołanie funkcji zapisującej raport
-    save_report_with_duration "$duration"
+    save_report_with_duration "$duration" "$refresh_interval"
 }
 
 # Wyświetlenie pomocy
@@ -195,6 +210,7 @@ if [[ $# -gt 0 ]]; then
     case $1 in
         -h) show_help; exit 0 ;;
         -v) show_version; exit 0 ;;
+        man) man skrypt; exit 0 ;;
         *) echo "Nieznana opcja: $1"; show_help; exit 1 ;;
     esac
 fi
