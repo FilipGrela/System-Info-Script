@@ -64,6 +64,24 @@ function network_info() {
     echo ""
 }
 
+# Wyświetlenie pomocy
+function show_help() {
+    echo "Użycie: ./skrypt.sh [opcje]"
+    echo ""
+    echo "Opcje:"
+    echo "  -h    Wyświetl pomoc"
+    echo "  -v    Informacja o wersji i autorze"
+    echo ""
+}
+
+# Wyświetlenie informacji o wersji i autorze
+function show_version() {
+    echo "System Info Script"
+    echo "Wersja: 0.1"
+    echo "Autor: Filip Grela (fgrela09@gmail.com)"
+    echo ""
+}
+
 function show_menu() {
     echo "=== MENU ==="
     echo "1) Wyświetl informacje systemowe"
@@ -84,6 +102,15 @@ function show_menu() {
         *) clear; echo "Niepoprawny wybór!"; sleep 1;;
     esac
 }
+
+# Obsługa opcji wiersza poleceń
+if [[ $# -gt 0 ]]; then
+    case $1 in
+        -h) show_help; exit 0 ;;
+        -v) show_version; exit 0 ;;
+        *) echo "Nieznana opcja: $1"; show_help; exit 1 ;;
+    esac
+fi
 
 while true; do
     clear
