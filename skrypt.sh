@@ -14,7 +14,7 @@
 
 # === KONFIGURACJA ===
 REPORT_FILE="raport_systemowy.txt"
-REFRESH_INTERVAL=0.2   # sekundy między odświeżeniami (dla trybu dynamicznego)
+REFRESH_INTERVAL=1   # sekundy między odświeżeniami (dla trybu dynamicznego)
 
 # === FUNKCJE ===
 
@@ -87,6 +87,22 @@ function save_report() {
         generate_raport
     } > "$REPORT_FILE"
     zenity --info --text="Raport zapisany do $REPORT_FILE"
+}
+
+function dynamic_mode() {
+    while true; do
+        clear
+        echo "🟢 TRYB DYNAMICZNY – Odświeżanie co $REFRESH_INTERVAL sekund. Naciśnij 'q', aby wyjść."
+        echo "-----------------------------------------"
+        generate_raport
+
+        # Sprawdzenie, czy naciśnięto spację
+        read -t $REFRESH_INTERVAL -n1 key
+        if [[ $key == "q" ]]; then
+            echo ">>> Zakończono tryb dynamiczny."
+            break
+        fi
+    done
 }
 
 
