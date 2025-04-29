@@ -105,6 +105,50 @@ function dynamic_mode() {
     done
 }
 
+# Funkcja zapisująca raport przez określony czas
+function save_report_with_duration() {
+    local duration=$1
+    local file_name="raport_systemowy_$(date +%Y%m%d_%H%M%S).txt"
+
+    echo ">>> Rozpoczęto zapisywanie raportu do pliku $file_name przez $duration sekund..."
+    start_time=$(date +%s)
+    end_time=$((start_time + duration))
+
+    # Tworzenie pliku i zapisywanie nagłówka
+    echo "Raport systemowy (czas trwania: $duration sekund)" > "$file_name"
+    echo "----------------------------------------" >> "$file_name"
+
+    while [[ $(date +%s) -lt $end_time ]]; do
+        # Dodanie znacznika czasu i danych systemowych do pliku
+        echo "Czas: $(date)" >> "$file_name"
+        generate_raport >> "$file_name"
+        echo "----------------------------------------" >> "$file_name"
+        sleep "$REFRESH_INTERVAL"
+    done
+
+    echo ">>> Raport zapisany do pliku $file_name"
+    zenity --info --text="Raport zapisany do pliku $file_name"
+}
+
+# Funkcja wywołująca zapis raportu z oknem dialogowym
+function save_report_with_dialog() {
+    local duration=$(zenity --entry --title="Czas trwania raportu" --text="Podaj czas trwania (w sekundach):")
+
+    # Sprawdzenie, czy użytkownik podał wartość
+    if [[ -z "$duration" ]]; then
+        zenity --error --text="Nie podano czasu trwania!"
+        return
+    fi
+
+    # Sprawdzenie, czy podano liczbę
+    if ! [[ "$duration" =~ ^[0-9]+$ ]]; then
+        zenity --error --text="Podano nieprawidłowy czas! Wprowadź liczbę całkowitą."
+        return
+    fi
+
+    # Wywołanie funkcji zapisującej raport
+    save_report_with_duration "$duration"
+}
 
 # Wyświetlenie pomocy
 function show_help() {
@@ -129,10 +173,10 @@ function show_menu() {
     echo "1) Wyświetl informacje systemowe"
     echo "2) Zapisz raport do pliku"
     echo "3) Tryb dynamiczny (monitor na żywo)"
+    echo "4) Zapisz raport z określonego okresu (z oknem dialogowym)"
     echo "0) Wyjście"
     
     read -p "Wybierz opcję: " choice
-    
 
     clear
     # Call the function for the selected option
@@ -140,6 +184,7 @@ function show_menu() {
         1) display_info ;;
         2) save_report ;;
         3) dynamic_mode ;;
+        4) save_report_with_dialog ;;
         0) exit 0 ;;
         *) zenity --error --text="Niepoprawny wybór!";;
     esac
