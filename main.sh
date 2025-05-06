@@ -14,8 +14,15 @@
 
 
 # === KONFIGURACJA ===
-REPORT_FILE="raport_systemowy.txt"
-REFRESH_INTERVAL=1
+CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/sysinfo.conf"
+
+# Domyślne wartości – używane gdy plik nie istnieje
+: "${REPORT_FILE:=raport_systemowy.txt}"
+: "${REFRESH_INTERVAL:=1}"
+
+# Wczytaj konfigurację (jeśli plik istnieje)
+[[ -f "$CONFIG_FILE" ]] && source "$CONFIG_FILE"
+
 
 # Załaduj funkcje z pliku functions.sh
 source ./functions.sh

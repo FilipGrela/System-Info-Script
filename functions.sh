@@ -72,11 +72,8 @@ function generate_raport() {
 }
 
 # Wyświetlanie informacji systemowych
-function display_info() {
-    echo "=== Informacje systemowe ==="
-    generate_raport
-    echo "Naciśnij Enter, aby kontynuować..."
-    read
+display_info() {
+    zenity --text-info --width=600 --height=500 --title="Informacje systemowe" --filename=<(generate_raport)
 }
 
 # Zapis raportu do pliku
@@ -160,47 +157,42 @@ function save_report_with_dialog() {
     save_report_with_duration "$duration" "$refresh_interval"
 }
 
-function zenity_menu() {
-    local choice=$(zenity --list --title="Menu główne" \
-        --column="Opcja" --column="Opis" \
-        1 "Wyświetl informacje systemowe" \
-        2 "Zapisz raport do pliku" \
-        3 "Tryb dynamiczny (monitor na żywo)" \
-        4 "Zapisz raport z określonego okresu" \
-        0 "Wyjście")
-
-    if [[ -z "$choice" ]]; then
-        choice=0
-    fi
+zenity_menu() {
+    local choice
+    choice=$(zenity --list --title="sysinfo – menu" --column="Opcja" --column="Opis"             1 "Wyświetl informacje systemowe"             2 "Zapisz raport do pliku"             3 "Tryb dynamiczny (monitor na żywo)"             4 "Zapisz raport z określonego okresu"             5 "Ustawienia"             0 "Wyjście") || exit 0
 
     case $choice in
         1) display_info ;;
         2) save_report ;;
         3) dynamic_mode ;;
         4) save_report_with_dialog ;;
-        0) exit 0 ;;
-        *) zenity --error --text="Niepoprawny wybór!";;
+        5) settings_dialog ;;
+        0|"") exit 0 ;;
+        *) zenity --error --text="Niepoprawny wybór!" ;;
     esac
 }
 
-function show_menu() {
-    echo "=== MENU ==="
-    echo "1) Wyświetl informacje systemowe"
-    echo "2) Zapisz raport do pliku"
-    echo "3) Tryb dynamiczny (monitor na żywo)"
-    echo "4) Zapisz raport z określonego okresu (z oknem dialogowym)"
-    echo "0) Wyjście"
-    
-    read -p "Wybierz opcję: " choice
+# --- Konfiguracja ---
 
-    clear
-    # Call the function for the selected option
-    case $choice in
-        1) display_info ;;
-        2) save_report ;;
-        3) dynamic_mode ;;
-        4) save_report_with_dialog ;;
-        0) exit 0 ;;
-        *) zenity --error --text="Niepoprawny wybór!";;
-    esac
-}   
+# Zapisz bieżące wartości do pliku konfiguracyjnego
+function save_config() {
+    mkdir -p "$(dirname "$CONFIG_FILE")"
+    cat > "$CONFIG_FILE" <<EOF
+REPORT_FILE=$REPORT_FILE
+REFRESH_INTERVAL=$REFRESH_INTERVAL
+EOF
+}
+
+settings_dialog() {
+    local new_report
+    new_report=$(zenity --entry --title="Plik raportu" --text="Podaj nazwę pliku:" --entry-text="$REPORT_FILE") || return
+
+    local new_interval
+    new_interval=$(zenity --entry --title="Odświeżanie" --text="Podaj interwał (sekundy):" --entry-text="$REFRESH_INTERVAL") || return
+    [[ $new_interval =~ ^[0-9]+$ ]] || { zenity --error --text="Interwał musi być liczbą!"; return; }
+
+    REPORT_FILE="$new_report"
+    REFRESH_INTERVAL="$new_interval"
+    save_config
+    zenity --info --text="Zapisano ustawienia w $CONFIG_FILE"
+}
