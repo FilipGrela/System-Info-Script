@@ -1,32 +1,43 @@
-.TH SKRYPT 1 "29 April 2025" "Version 0.1" "System Info Script Manual"
-.SH NAME
-main \- Skrypt do wyświetlania i zapisywania informacji o systemie
-.SH SYNOPSIS
-.B ./main.sh
+.TH SYSINFO 1 "06 Maj 2025" "sysinfo 0.2"
+.SH NAZWA
+sysinfo \\- narzędzie do przeglądania i monitorowania informacji o systemie
+.SH SYNOPSA
+.B sysinfo
 .RI [ opcje ]
-.SH DESCRIPTION
-Skrypt wyświetla szczegółowe informacje o systemie, takie jak dane o procesorze, pamięci RAM, dyskach, czasie działania systemu i sieci. Umożliwia również zapis raportów do pliku.
+.SH OPIS
+.B sysinfo
+jest narzędziem do monitorowania i wyświetlania informacji o systemie, takich jak CPU, pamięć, użycie dysku oraz inne metryki systemowe. Umożliwia również zapisywanie raportów do pliku i uruchamianie w trybie dynamicznego odświeżania w celu ciągłego monitorowania.
+
+Domyślne wywołanie uruchamia interaktywny interfejs menu, w którym użytkownik może wybrać różne opcje monitorowania systemu.
 
 .SH OPCJE
 .TP
 .B -h
-Wyświetla pomoc.
+Wyświetla pomoc dotyczącą użycia narzędzia i dostępnych opcji.
 .TP
 .B -v
-Wyświetla informacje o wersji i autorze.
+Wyświetla wersję programu oraz dane kontaktowe autora.
 .TP
 .B man
-Wyświetla stronę manuala.
+Wyświetla stronę manuala dla skryptu.
 
-.SH PRZYKŁADY
-Uruchomienie skryptu:
-.B ./main.sh
+.SH PLIK KONFIGURACYJNY
+Plik konfiguracyjny dla sysinfo znajduje się w:
+.I $XDG_CONFIG_HOME/sysinfo.conf
+lub
+.I $HOME/.config/sysinfo.conf
 
-Wyświetlenie pomocy:
-.B ./main.sh -h
-
-Wyświetlenie informacji o wersji:
-.B ./main.sh -v
+Domyślnie zawiera ustawienia dla:
+.TP
+.B REPORT_FILE
+Określa plik wyjściowy, do którego zapisywane będą raporty.
+.TP
+.B REFRESH_INTERVAL
+Definiuje interwał w sekundach dla odświeżania danych w trybie dynamicznym.
 
 .SH AUTOR
-Filip Grela (fgrela09@gmail.com)
+Filip Grela <fgrela09@gmail.com>
+
+.SH ZOBACZ TAKŻE
+.BR watch (1), 
+.BR zenity (1)
