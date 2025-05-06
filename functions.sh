@@ -1,7 +1,9 @@
+#!/bin/bash
+
 # Author           : Imie Nazwisko ( Filip Grela )
-# Created On       : 29.04.2025
+# Last Modified On : 06.05.2025 
 # Last Modified By : Imie Nazwisko ( fgrela09@gmail.com )
-# Last Modified On : 29.04.2025 
+# Last Modified On : 06.05.2025 
 # Version          : 0.1
 #
 # Description      :
@@ -10,11 +12,6 @@
 # Licensed under GPL (see /usr/share/common-licenses/GPL for more details
 # or contact # the Free Software Foundation for a copy)
 
-#!/bin/bash
-
-# === KONFIGURACJA ===
-REPORT_FILE="raport_systemowy.txt"
-REFRESH_INTERVAL=1   # sekundy między odświeżeniami (dla trybu dynamicznego)
 
 # === FUNKCJE ===
 
@@ -64,15 +61,17 @@ function network_info() {
     echo ""
 }
 
-function generate_raport(){
+# Generowanie raportu
+function generate_raport() {
     basic_info
     cpu_info
     memory_info
     disk_info
     uptime_info
-    network_info 
+    network_info
 }
 
+# Wyświetlanie informacji systemowych
 function display_info() {
     echo "=== Informacje systemowe ==="
     generate_raport
@@ -80,6 +79,7 @@ function display_info() {
     read
 }
 
+# Zapis raportu do pliku
 function save_report() {
     echo ">>> Generowanie raportu do $REPORT_FILE..."
     {
@@ -89,6 +89,7 @@ function save_report() {
     zenity --info --text="Raport zapisany do $REPORT_FILE"
 }
 
+# Tryb dynamiczny
 function dynamic_mode() {
     while true; do
         clear
@@ -96,7 +97,7 @@ function dynamic_mode() {
         echo "-----------------------------------------"
         generate_raport
 
-        # Sprawdzenie, czy naciśnięto spację
+        # Sprawdzenie, czy naciśnięto klawisz
         read -t $REFRESH_INTERVAL -n1 key
         if [[ $key == "q" ]]; then
             echo ">>> Zakończono tryb dynamiczny."
@@ -105,10 +106,10 @@ function dynamic_mode() {
     done
 }
 
-# Funkcja zapisująca raport przez określony czas
+# Zapis raportu przez określony czas
 function save_report_with_duration() {
     local duration=$1
-    local refresh_interval=$1
+    local refresh_interval=$2
     local file_name="raport_systemowy_$(date +%Y%m%d_%H%M%S).txt"
 
     echo ">>> Rozpoczęto zapisywanie raportu do pliku $file_name przez $duration sekund..."
@@ -120,7 +121,6 @@ function save_report_with_duration() {
     echo "----------------------------------------" >> "$file_name"
 
     while [[ $(date +%s) -lt $end_time ]]; do
-        # Dodanie znacznika czasu i danych systemowych do pliku
         echo "Czas: $(date)" >> "$file_name"
         generate_raport >> "$file_name"
         echo "----------------------------------------" >> "$file_name"
@@ -131,17 +131,15 @@ function save_report_with_duration() {
     zenity --info --text="Raport zapisany do pliku $file_name"
 }
 
-# Funkcja wywołująca zapis raportu z oknem dialogowym
+# Zapis raportu z oknem dialogowym
 function save_report_with_dialog() {
     local duration=$(zenity --entry --title="Czas trwania raportu" --text="Podaj czas trwania (w sekundach):")
 
-    # Sprawdzenie, czy użytkownik podał wartość
     if [[ -z "$duration" ]]; then
         zenity --error --text="Nie podano czasu trwania!"
         return
     fi
 
-    # Sprawdzenie, czy podano liczbę
     if ! [[ "$duration" =~ ^[0-9]+$ ]]; then
         zenity --error --text="Podano nieprawidłowy czas! Wprowadź liczbę całkowitą."
         return
@@ -149,38 +147,40 @@ function save_report_with_dialog() {
 
     local refresh_interval=$(zenity --entry --title="Interwał odświeżania" --text="Podaj interwał odświeżania (w sekundach):")
 
-    # Sprawdzenie, czy użytkownik podał wartość
     if [[ -z "$refresh_interval" ]]; then
         zenity --error --text="Nie podano interwału odświeżania!"
         return
     fi
 
-    # Sprawdzenie, czy podano liczbę
     if ! [[ "$refresh_interval" =~ ^[0-9]+$ ]]; then
         zenity --error --text="Podano nieprawidłowy interwał! Wprowadź liczbę całkowitą."
         return
     fi
 
-    # Wywołanie funkcji zapisującej raport
     save_report_with_duration "$duration" "$refresh_interval"
 }
 
-# Wyświetlenie pomocy
-function show_help() {
-    echo "Użycie: ./skrypt.sh [opcje]"
-    echo ""
-    echo "Opcje:"
-    echo "  -h    Wyświetl pomoc"
-    echo "  -v    Informacja o wersji i autorze"
-    echo ""
-}
+function zenity_menu() {
+    local choice=$(zenity --list --title="Menu główne" \
+        --column="Opcja" --column="Opis" \
+        1 "Wyświetl informacje systemowe" \
+        2 "Zapisz raport do pliku" \
+        3 "Tryb dynamiczny (monitor na żywo)" \
+        4 "Zapisz raport z określonego okresu" \
+        0 "Wyjście")
 
-# Wyświetlenie informacji o wersji i autorze
-function show_version() {
-    echo "System Info Script"
-    echo "Wersja: 0.1"
-    echo "Autor: Filip Grela (fgrela09@gmail.com)"
-    echo ""
+    if [[ -z "$choice" ]]; then
+        choice=0
+    fi
+
+    case $choice in
+        1) display_info ;;
+        2) save_report ;;
+        3) dynamic_mode ;;
+        4) save_report_with_dialog ;;
+        0) exit 0 ;;
+        *) zenity --error --text="Niepoprawny wybór!";;
+    esac
 }
 
 function show_menu() {
@@ -204,18 +204,3 @@ function show_menu() {
         *) zenity --error --text="Niepoprawny wybór!";;
     esac
 }   
-
-# Obsługa opcji wiersza poleceń
-if [[ $# -gt 0 ]]; then
-    case $1 in
-        -h) show_help; exit 0 ;;
-        -v) show_version; exit 0 ;;
-        man) man skrypt; exit 0 ;;
-        *) echo "Nieznana opcja: $1"; show_help; exit 1 ;;
-    esac
-fi
-
-while true; do
-    clear
-    show_menu
-done
