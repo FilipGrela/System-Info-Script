@@ -44,12 +44,12 @@ if [[ $# -gt 0 ]]; then
     case $1 in
         -h) show_help; exit 0 ;;
         -v) show_version; exit 0 ;;
-        man) man ./skrypt.1; exit 0 ;;
+        man) man "$(pwd)/main.1"; exit 0 ;;   
         *) echo "Nieznana opcja: $1"; show_help; exit 1 ;;
     esac
 fi
 
 # Menu główne
-while true; do
+while true; do  
     zenity_menu
 done
