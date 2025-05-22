@@ -1,11 +1,11 @@
-# Systemy-Operacyjne-duze-skrypty
+# Operating-Systems-large-script
 
-# Skrypt 1
+# Script 1
 ## System Information Script
 
-### Opis projektu
-Skrypt pozwala na wyświetlanie szczegółowych informacji o systemie, takich jak:
-- Procesor, pamięć, przestrzeń dyskowa i inne dane systemowe.
-- Stan systemu: zużycie procesora, pamięci, dysku itp.
-- Dynamiczna prezentacja danych z możliwością okresowego odświeżania.
-- Możliwość zapisania informacji do raportu w pliku, na podstawie danych z wybranego okresu czasu.
+### Project Description
+The script allows you to display detailed information about the system, such as:
+- Processor, memory, disk space and other system data.
+- System status: CPU, memory, disk usage, etc.
+- Dynamic data presentation with the possibility of periodic refresh.
+- Possibility to save information to a report in a file, based on data from a selected time period.
